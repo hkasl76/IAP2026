@@ -9,7 +9,7 @@ html,body{
 margin:0;
 height:100%;
 overflow:hidden;
-background:#020812;
+background:#ffffff;
 font-family:Arial,sans-serif;
 }
 #title{
@@ -53,6 +53,7 @@ for Industry and Society
 import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
 
 const scene = new THREE.Scene();
+scene.background = new THREE.Color(0xffffff);
 
 const camera = new THREE.PerspectiveCamera(
 45,
