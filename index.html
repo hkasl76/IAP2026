@@ -9,7 +9,7 @@ html,body{
 margin:0;
 height:100%;
 overflow:hidden;
-background:#0d1f2d;
+background:#0a1929;
 font-family:Arial,sans-serif;
 }
 #title{
@@ -52,8 +52,8 @@ letter-spacing:2px;
 import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
 
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x0d1f2d);
-scene.fog = new THREE.Fog(0x0d1f2d, 100, 200);
+scene.background = new THREE.Color(0x0a1929);
+scene.fog = new THREE.Fog(0x0a1929, 50, 100);
 
 const camera = new THREE.PerspectiveCamera(
   75,
@@ -66,30 +66,23 @@ camera.position.z = 20;
 const renderer = new THREE.WebGLRenderer({antialias:true, alpha:true});
 renderer.setSize(window.innerWidth,window.innerHeight);
 renderer.shadowMap.enabled = true;
-renderer.toneMappingExposure = 1.2;
 document.body.appendChild(renderer.domElement);
 
-// Strong lighting for golden shine
-const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
+// Lighting
+const ambientLight = new THREE.AmbientLight(0xffffff, 1.5);
 scene.add(ambientLight);
 
-const pointLight1 = new THREE.PointLight(0xffd700, 3);
-pointLight1.position.set(15, 15, 20);
+const pointLight1 = new THREE.PointLight(0x4dd0e1, 2);
+pointLight1.position.set(10, 10, 15);
 pointLight1.castShadow = true;
-pointLight1.intensity = 3.5;
 scene.add(pointLight1);
 
-const pointLight2 = new THREE.PointLight(0xffed4e, 2.5);
-pointLight2.position.set(-15, -10, 15);
+const pointLight2 = new THREE.PointLight(0xd4af37, 2);
+pointLight2.position.set(-10, -10, 15);
 pointLight2.castShadow = true;
 scene.add(pointLight2);
 
-const pointLight3 = new THREE.PointLight(0x4dd0e1, 2);
-pointLight3.position.set(0, 20, 10);
-pointLight3.castShadow = true;
-scene.add(pointLight3);
-
-// Hexagonal Lattice Background - BRIGHT CYAN
+// Hexagonal Lattice Background
 function createHexagonalLattice() {
   const geometry = new THREE.BufferGeometry();
   const vertices = [];
@@ -105,8 +98,8 @@ function createHexagonalLattice() {
       
       vertices.push(posX, posY, posZ);
       
-      // Bright cyan color
-      colors.push(0.0, 1.0, 1.0);
+      // Cyan color
+      colors.push(0.3, 0.8, 1.0);
     }
   }
   
@@ -140,13 +133,7 @@ function createHexagonalLattice() {
   }
   
   lines.setAttribute('position', new THREE.BufferAttribute(new Float32Array(lineVertices), 3));
-  const lineMaterial = new THREE.LineBasicMaterial({
-    color: 0x00ffff,
-    linewidth: 3,
-    fog: false,
-    emissive: 0x00ffff,
-    emissiveIntensity: 0.8
-  });
+  const lineMaterial = new THREE.LineBasicMaterial({color: 0x00d9c8, linewidth: 2, fog: false});
   const hexLines = new THREE.LineSegments(lines, lineMaterial);
   return hexLines;
 }
@@ -154,79 +141,66 @@ function createHexagonalLattice() {
 const hexLattice = createHexagonalLattice();
 scene.add(hexLattice);
 
-// Particle system - CYAN GLOW
-const particleCount = 3000;
+// Particle system
+const particleCount = 2000;
 const particleGeometry = new THREE.BufferGeometry();
 const particlePositions = new Float32Array(particleCount * 3);
 
 for(let i = 0; i < particleCount * 3; i += 3) {
-  particlePositions[i] = (Math.random() - 0.5) * 80;
-  particlePositions[i + 1] = (Math.random() - 0.5) * 80;
-  particlePositions[i + 2] = (Math.random() - 0.5) * 50 - 15;
+  particlePositions[i] = (Math.random() - 0.5) * 60;
+  particlePositions[i + 1] = (Math.random() - 0.5) * 60;
+  particlePositions[i + 2] = (Math.random() - 0.5) * 40 - 10;
 }
 
 particleGeometry.setAttribute('position', new THREE.BufferAttribute(particlePositions, 3));
 const particleMaterial = new THREE.PointsMaterial({
-  color: 0x00ffff,
-  size: 0.15,
+  color: 0x4dd0e1,
+  size: 0.1,
   sizeAttenuation: true,
-  emissive: 0x00ffff,
-  emissiveIntensity: 0.6,
   fog: false
 });
 const particles = new THREE.Points(particleGeometry, particleMaterial);
 scene.add(particles);
 
-// BRIGHT GOLDEN Material - with strong metalness
-const goldMaterial = new THREE.MeshStandardMaterial({
-  color: 0xffd700,
-  metalness: 1.0,
-  roughness: 0.15,
-  emissive: 0xffaa00,
-  emissiveIntensity: 0.6,
-  envMapIntensity: 1.5
+// Gold Material
+const goldMaterial = new THREE.MeshPhysicalMaterial({
+  color: 0xd4af37,
+  metalness: 0.95,
+  roughness: 0.08,
+  clearcoat: 1,
+  clearcoatRoughness: 0.1,
+  emissive: 0x8b6914,
+  emissiveIntensity: 0.3
 });
 
-// Create environment for better reflections
-const canvas = document.createElement('canvas');
-canvas.width = 1;
-canvas.height = 1;
-const ctx = canvas.getContext('2d');
-ctx.fillStyle = '#333';
-ctx.fillRect(0, 0, 1, 1);
-const envTexture = new THREE.CanvasTexture(canvas);
-
-// O2 Molecule - Center Oxygen Ring - BRIGHT GOLDEN
-const ringGeometry = new THREE.TorusGeometry(2.5, 0.5, 128, 200);
+// O2 Molecule - Center Oxygen Ring
+const ringGeometry = new THREE.TorusGeometry(2, 0.4, 64, 200);
 const centerRing = new THREE.Mesh(ringGeometry, goldMaterial);
 centerRing.castShadow = true;
-centerRing.receiveShadow = true;
 scene.add(centerRing);
 
-// Connecting rods - BRIGHT GOLDEN
-const rodGeometry = new THREE.CylinderGeometry(0.2, 0.2, 4.5, 64);
+// Connecting rods
+const rodGeometry = new THREE.CylinderGeometry(0.15, 0.15, 4, 32);
 const rod1 = new THREE.Mesh(rodGeometry, goldMaterial);
 rod1.position.set(0, 0, 0);
 rod1.rotation.z = Math.PI / 2;
 rod1.castShadow = true;
-rod1.receiveShadow = true;
 scene.add(rod1);
 
 const rod2 = new THREE.Mesh(rodGeometry, goldMaterial);
 rod2.position.set(0, 0, 0);
 rod2.rotation.z = -Math.PI / 2;
 rod2.castShadow = true;
-rod2.receiveShadow = true;
 scene.add(rod2);
 
-// Oxygen atoms (spheres) - BRIGHT GOLDEN with glow
-const sphereGeometry = new THREE.SphereGeometry(1.0, 128, 128);
+// Oxygen atoms (spheres)
+const sphereGeometry = new THREE.SphereGeometry(0.8, 64, 64);
 const spheres = [];
 
 const positions = [
-  {x: 4.5, y: 0, z: 0},
-  {x: -4.5, y: 0, z: 0},
-  {x: 0, y: 4.5, z: 0}
+  {x: 4, y: 0, z: 0},
+  {x: -4, y: 0, z: 0},
+  {x: 0, y: 4, z: 0}
 ];
 
 positions.forEach(pos => {
@@ -235,45 +209,25 @@ positions.forEach(pos => {
   sphere.castShadow = true;
   sphere.receiveShadow = true;
   scene.add(sphere);
-  
-  // Add glow sphere
-  const glowGeometry = new THREE.SphereGeometry(1.1, 32, 32);
-  const glowMaterial = new THREE.MeshBasicMaterial({
-    color: 0xffaa00,
-    emissive: 0xffaa00,
-    emissiveIntensity: 0.3,
-    transparent: true,
-    opacity: 0.3
-  });
-  const glowSphere = new THREE.Mesh(glowGeometry, glowMaterial);
-  glowSphere.position.copy(sphere.position);
-  scene.add(glowSphere);
-  
-  spheres.push({
-    mesh: sphere,
-    glow: glowSphere,
-    startPos: {x: pos.x, y: pos.y, z: pos.z}
-  });
+  spheres.push({mesh: sphere, startPos: {x: pos.x, y: pos.y, z: pos.z}});
 });
 
-// O2 text label - GOLDEN
-const canvas2 = document.createElement('canvas');
-canvas2.width = 512;
-canvas2.height = 256;
-const ctx2 = canvas2.getContext('2d');
-ctx2.fillStyle = '#d4af37';
-ctx2.font = 'bold 140px Arial';
-ctx2.textAlign = 'center';
-ctx2.textBaseline = 'middle';
-ctx2.shadowColor = '#ffaa00';
-ctx2.shadowBlur = 20;
-ctx2.fillText('O₂', 256, 128);
+// O2 text label
+const canvas = document.createElement('canvas');
+canvas.width = 512;
+canvas.height = 256;
+const ctx = canvas.getContext('2d');
+ctx.fillStyle = '#d4af37';
+ctx.font = 'bold 120px Arial';
+ctx.textAlign = 'center';
+ctx.textBaseline = 'middle';
+ctx.fillText('O₂', 256, 128);
 
-const texture = new THREE.CanvasTexture(canvas2);
+const texture = new THREE.CanvasTexture(canvas);
 const spriteMaterial = new THREE.SpriteMaterial({map: texture});
 const sprite = new THREE.Sprite(spriteMaterial);
-sprite.position.z = 10;
-sprite.scale.set(10, 5, 1);
+sprite.position.z = 8;
+sprite.scale.set(8, 4, 1);
 scene.add(sprite);
 
 // Animation loop
@@ -282,29 +236,24 @@ function animate(){
   requestAnimationFrame(animate);
   time += 0.01;
   
-  // Rotate center ring with glow
+  // Rotate center ring
   centerRing.rotation.x += 0.003;
   centerRing.rotation.y += 0.005;
   
-  // Orbit rods with more dramatic movement
-  rod1.rotation.z = Math.PI / 2 + Math.sin(time * 0.5) * 0.4;
-  rod2.rotation.z = -Math.PI / 2 + Math.cos(time * 0.5) * 0.4;
+  // Orbit rods
+  rod1.rotation.z = Math.PI / 2 + Math.sin(time * 0.5) * 0.3;
+  rod2.rotation.z = -Math.PI / 2 + Math.cos(time * 0.5) * 0.3;
   
   // Animate spheres in orbit pattern
   spheres.forEach((sphere, index) => {
     const angle = (time * 0.8) + (index * Math.PI * 2 / spheres.length);
-    const radius = 4.5 + Math.sin(time * 0.3) * 0.8;
+    const radius = 4 + Math.sin(time * 0.3) * 0.5;
     
     sphere.mesh.position.x = Math.cos(angle) * radius;
-    sphere.mesh.position.y = Math.sin(angle) * radius * 0.7;
-    sphere.mesh.position.z = Math.sin(angle * 2) * 2.5;
-    
-    sphere.mesh.rotation.x += 0.004;
-    sphere.mesh.rotation.y += 0.005;
-    
-    // Update glow position
-    sphere.glow.position.copy(sphere.mesh.position);
-    sphere.glow.rotation.copy(sphere.mesh.rotation);
+    sphere.mesh.position.y = Math.sin(angle) * radius * 0.6;
+    sphere.mesh.position.z = Math.sin(angle * 2) * 2;
+    sphere.mesh.rotation.x += 0.002;
+    sphere.mesh.rotation.y += 0.003;
   });
   
   // Rotate hexagon lattice slowly
@@ -313,16 +262,16 @@ function animate(){
   // Particle animation
   const particlePositions = particles.geometry.attributes.position.array;
   for(let i = 0; i < particleCount * 3; i += 3) {
-    particlePositions[i + 2] += 0.15;
-    if(particlePositions[i + 2] > 30) {
-      particlePositions[i + 2] = -30;
+    particlePositions[i + 2] += 0.1;
+    if(particlePositions[i + 2] > 20) {
+      particlePositions[i + 2] = -20;
     }
   }
   particles.geometry.attributes.position.needsUpdate = true;
   
   // Camera orbit
-  camera.position.x = Math.sin(time * 0.3) * 6;
-  camera.position.y = Math.cos(time * 0.4) * 4;
+  camera.position.x = Math.sin(time * 0.3) * 5;
+  camera.position.y = Math.cos(time * 0.4) * 3;
   camera.lookAt(0, 0, 0);
   
   renderer.render(scene, camera);
