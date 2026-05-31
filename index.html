@@ -150,6 +150,7 @@ const timeline = {
 
 let currentTime = 0;
 let animationComplete = false;
+let ringsFormed = false;
 
 // Lighting
 const ambientLight = new THREE.AmbientLight(0xffffff, 0.3);
@@ -265,24 +266,7 @@ const centralRing = new THREE.Mesh(
 centralRing.scale.set(0, 0, 0);
 moleculeGroup.add(centralRing);
 
-// Connecting Rods
-const rod1 = new THREE.Mesh(
-  new THREE.CylinderGeometry(0.15, 0.15, 4.5, 32),
-  goldMaterial
-);
-rod1.rotation.z = Math.PI / 2;
-rod1.scale.set(0, 0, 0);
-moleculeGroup.add(rod1);
-
-const rod2 = new THREE.Mesh(
-  new THREE.CylinderGeometry(0.15, 0.15, 3.5, 32),
-  goldMaterial
-);
-rod2.rotation.z = -Math.PI / 2;
-rod2.scale.set(0, 0, 0);
-moleculeGroup.add(rod2);
-
-// Oxygen Atoms (Spheres)
+// Oxygen Atoms (Spheres) - NO RODS
 const spheres = [];
 const spherePositions = [
   { x: 4.5, y: 0, z: 0 },
@@ -313,7 +297,7 @@ spherePositions.forEach((pos, index) => {
   spheres.push({ mesh: sphere, glow: glow, pos: pos });
 });
 
-// O2 Text Label
+// O2 Text Label WITH "2" visible
 const o2TextGroup = new THREE.Group();
 scene.add(o2TextGroup);
 
@@ -356,7 +340,7 @@ function updateAnimation(elapsed) {
     particleSystem.material.opacity = progress;
   }
 
-  // STAGE 3: Rings Form (3.5-6s)
+  // STAGE 3: Rings Form (3.5-6s) - Form and stay permanent
   if (currentTime >= timeline.stage3.start && currentTime < timeline.stage3.start + timeline.stage3.duration) {
     const progress = (currentTime - timeline.stage3.start) / timeline.stage3.duration;
     
@@ -364,21 +348,22 @@ function updateAnimation(elapsed) {
       const delay = index * 0.1;
       const ringProgress = Math.max(0, Math.min(1, (progress - delay) / 0.6));
       ring.mesh.material.opacity = ringProgress * 0.7;
-      ring.mesh.rotation.x += 0.01;
-      ring.mesh.rotation.y += 0.015;
     });
 
-    ringsGroup.rotation.x += 0.003;
-    ringsGroup.rotation.y += 0.005;
+    ringsFormed = false;
+  } else if (currentTime >= timeline.stage3.start + timeline.stage3.duration) {
+    // Keep rings visible permanently after stage 3
+    if (!ringsFormed) {
+      rings.forEach((ring) => {
+        ring.mesh.material.opacity = 0.7;
+      });
+      ringsFormed = true;
+    }
   }
 
   // STAGE 4: Molecule Assembles (6-8.5s)
   if (currentTime >= timeline.stage4.start && currentTime < timeline.stage4.start + timeline.stage4.duration) {
     const progress = (currentTime - timeline.stage4.start) / timeline.stage4.duration;
-
-    // Scale rods
-    rod1.scale.set(progress, progress, progress);
-    rod2.scale.set(progress, progress, progress);
 
     // Scale and position spheres with stagger
     spheres.forEach((sphere, index) => {
@@ -419,6 +404,8 @@ function updateAnimation(elapsed) {
       3 + progress * 0.5,
       1
     );
+    // O2 rotates on its own axis
+    o2TextGroup.rotation.z += 0.015;
   }
 
   // Keep animations running
